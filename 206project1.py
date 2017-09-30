@@ -1,17 +1,26 @@
 import os
+import operator
+import csv
+from datetime import datetime, date
+import filecmp
 
 def getData(file):
 #Input: file name
-#Ouput: return a list of dictionary objects where 
+#Ouput: return a list of dictionary objects where
 #the keys will come from the first row in the data.
 
-#Note: The column headings will not change from the 
-#test cases below, but the the data itself will 
-#change (contents and size) in the different test 
+#Note: The column headings will not change from the
+#test cases below, but the the data itself will
+#change (contents and size) in the different test
 #cases.
 
 	#Your code here:
-	pass
+	dictreader = csv.DictReader(open(file))
+	dict_list = []
+	for line in dictreader:
+		dict_list.append(line)
+	return (dict_list)
+
 
 #Sort based on key/column
 def mySort(data,col):
@@ -19,17 +28,35 @@ def mySort(data,col):
 #Output: Return a string of the form firstName lastName
 
 	#Your code here:
-	pass
+	sort = sorted(data, key=operator.itemgetter(col))
+	firstLast = sort[0]['First'] + " " + sort[0]['Last']
+	return(firstLast)
+
 
 #Create a histogram
 def classSizes(data):
 # Input: list of dictionaries
 # Output: Return a list of tuples ordered by
-# ClassName and Class size, e.g 
+# ClassName and Class size, e.g
 # [('Senior', 26), ('Junior', 25), ('Freshman', 21), ('Sophomore', 18)]
 
 	#Your code here:
-	pass
+	d = {}
+	for x in data:
+		# print(x['Class'])
+		if "Senior" == x["Class"]:
+			d["Senior"] = d.get("Senior",0) + 1
+			# print(dict1)
+		if "Junior" == x["Class"]:
+ 			d["Junior"] = d.get("Junior",0) + 1
+		if "Sophomore" == x["Class"]:
+			d["Sophomore"] = d.get('Sophomore',0) + 1
+		if "Freshman" == x["Class"]:
+			d["Freshman"] = d.get('Freshman',0) + 1
+	#--------------------------------------------------------------------
+	x = sorted(d.items(), key=operator.itemgetter(1), reverse = True)
+	return(x)
+
 
 
 
@@ -40,7 +67,20 @@ def findDay(a):
 # most often seen in the DOB
 
 	#Your code here:
-	pass
+	list_wkdays = []
+	split_wkdays = []
+	dict_days = {}
+	for b in a:
+		dob = b.get('DOB')
+		split_days = dob.split('/')
+		split_wkdays.append(split_days)
+	for z in split_wkdays:
+		list_wkdays.append(z[1])
+	for wkday in list_wkdays:
+		dict_days[wkday] = dict_days.get(wkday, 0) + 1
+	final_dict = sorted(dict_days.items(), key = lambda x:x[1], reverse = True)
+	return int(final_dict[0][0])
+
 
 
 # Find the average age (rounded) of the Students
@@ -50,7 +90,21 @@ def findAge(a):
 # most often seen in the DOB
 
 	#Your code here:
-	pass
+	list_bday = []
+	list_age = []
+	today_date = date.today()
+	for t in a:
+		dob_ = t.get('DOB')
+		bday1 = datetime.strptime(dob_, "%m/%d/%Y")
+		list_bday.append(bday1)
+	for y in list_bday:
+		age = today_date.year - y.year - ((today_date.month, today_date.day) < (y.month, y.day))
+		list_age.append(age)
+	added_age = sum(list_age)
+	age_count = len(list_age)
+	avg_age = round(added_age / age_count)
+	return avg_age
+
 
 #Similar to mySort, but instead of returning single
 #Student, all of the sorted data is saved to a csv file.
@@ -59,7 +113,17 @@ def mySortPrint(a,col,fileName):
 #Output: None
 
 	#Your code here:
-	pass
+	csv = open(fileName, 'w')
+	sortedList = sorted(a, key = lambda k: k[col])
+	for element in sortedList:
+		temp = []
+		for value in element.values():
+			temp.append(value)
+		row = ",".join(temp[:3])
+		csv.write(row + "\n")
+
+	csv.close()
+	return None
 
 
 
@@ -106,7 +170,7 @@ def main():
 	print("\nThe most common day of the year to be born is:")
 	total += test(findDay(data),13,10)
 	total += test(findDay(data2),26,10)
-	
+
 	print("\nThe average age is:")
 	total += test(findAge(data),39,10)
 	total += test(findAge(data2),41,10)
@@ -121,4 +185,3 @@ def main():
 # Standard boilerplate to call the main() function that tests all your code.
 if __name__ == '__main__':
     main()
-
